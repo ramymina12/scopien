@@ -15,7 +15,7 @@ interface MessageBubbleProps {
   user: User | null;
 }
 
-const isHtml = (content: string) => /<[a-z][\s\S]*>/i.test(content);
+const isHtml = (content: string) => /<[a-z][\s\S]*>/i.test(content) && !/```/i.test(content);
 
 export default function MessageBubble({ message, user }: MessageBubbleProps) {
   const isUser = message.type === 'human';
