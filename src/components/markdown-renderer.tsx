@@ -14,7 +14,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
     // This check is to avoid running marked on the server, where it might not be available
     // or to prevent hydration mismatches if server/client rendering differs.
     if (typeof window !== 'undefined') {
-        const parsed = marked.parse(content, { gfm: true, breaks: true });
+        const parsed = marked.parse(content || '', { gfm: true, breaks: true });
         // It's good practice to sanitize, but for this app we trust the AI source.
         setHtmlContent(parsed as string);
     }

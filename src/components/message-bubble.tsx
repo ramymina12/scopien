@@ -8,14 +8,18 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import MarkdownRenderer from './markdown-renderer';
 import HtmlRenderer from './html-renderer';
-import { Card, CardContent } from './ui/card';
 
 interface MessageBubbleProps {
   message: Message;
   user: User | null;
 }
 
-const isHtml = (content: string) => /<[a-z][\s\S]*>/i.test(content) && !/```/i.test(content);
+// A simple check to see if the content is likely intended to be HTML.
+// It looks for a starting html tag and avoids common markdown code blocks.
+const isHtml = (content: string) => {
+    const trimmed = content.trim();
+    return trimmed.startsWith('<') && trimmed.endsWith('>') && !trimmed.includes('```');
+}
 
 export default function MessageBubble({ message, user }: MessageBubbleProps) {
   const isUser = message.type === 'human';
