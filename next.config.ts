@@ -24,6 +24,11 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  serverActions: {
+    allowedOrigins: [
+      '*.googleusercontent.com',
+    ],
+  },
   devServer: {
     allowedDevOrigins: [
       'https://*.cloudworkstations.dev',
