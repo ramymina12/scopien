@@ -7,7 +7,7 @@ import { Bot, User as UserIcon, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ActionableResponse } from './actionable-response';
-import { marked } from 'marked';
+import MarkdownRenderer from './markdown-renderer';
 
 interface MessageBubbleProps {
   message: Message;
@@ -34,15 +34,14 @@ export default function MessageBubble({ message, user }: MessageBubbleProps) {
     </Avatar>
   );
 
-  const isHtml = (str: string) => /<[a-z][\s\S]*>/i.test(str);
+  const isHtml = (str: string) => /<html/i.test(str.trim());
 
   const renderContent = () => {
     if (message.type === 'ai') {
       if (isHtml(message.content)) {
-        const parsedHtml = marked.parse(message.content, { gfm: true, breaks: true });
-        return <ActionableResponse htmlContent={parsedHtml as string} />;
+        return <ActionableResponse htmlContent={message.content} />;
       }
-      return <div className="markdown-content" dangerouslySetInnerHTML={{ __html: marked.parse(message.content, { gfm: true, breaks: true }) as string }} />;
+      return <MarkdownRenderer content={message.content} />;
     }
     return <p className="text-sm whitespace-pre-wrap">{message.content}</p>;
   }
@@ -50,10 +49,13 @@ export default function MessageBubble({ message, user }: MessageBubbleProps) {
   return (
     <div className={cn('flex items-start gap-4', isUser && 'flex-row-reverse')}>
       {!isError && avatar}
-      <div className={cn('flex flex-col gap-1', isUser ? 'items-end' : 'items-start')}>
+      <div className={cn(
+        'flex flex-col gap-1 w-full', 
+        isUser ? 'items-end' : 'items-start'
+        )}>
         <div
           className={cn(
-            'max-w-xl rounded-lg p-3',
+            'max-w-4xl rounded-lg p-3 w-full',
             isUser ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground',
             isError && 'bg-destructive/10 border border-destructive/50 text-destructive-foreground w-full'
           )}
