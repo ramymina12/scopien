@@ -13,11 +13,11 @@ import { Separator } from './ui/separator';
 export default function ChatArea() {
   const { activeSession, sendMessage, isSendingMessage } = useChat();
   const { user } = useAuth();
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    if (scrollViewportRef.current) {
+      scrollViewportRef.current.scrollTop = scrollViewportRef.current.scrollHeight;
     }
   }, [activeSession?.messages]);
 
@@ -31,7 +31,7 @@ export default function ChatArea() {
         <h2 className="text-lg font-semibold">{activeSession.title}</h2>
       </header>
       <main className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full" viewportRef={scrollAreaRef}>
+        <ScrollArea className="h-full" viewportRef={scrollViewportRef}>
           <div className="p-6 space-y-6">
             {activeSession.messages.map((message) => (
               <MessageBubble key={message.id} message={message} user={user} />
