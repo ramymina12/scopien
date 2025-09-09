@@ -1,3 +1,21 @@
+'use client';
+
+import { useAuth } from '@/contexts/auth-provider';
+import LoginPage from '@/components/login-page';
+import ChatLayout from '@/components/chat-layout';
+import { Spinner } from '@/components/spinner';
+import type { User } from 'firebase/auth';
+
 export default function Home() {
-  return <></>;
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-background">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  return user ? <ChatLayout user={user as User} /> : <LoginPage />;
 }
