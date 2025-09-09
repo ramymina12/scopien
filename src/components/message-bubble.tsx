@@ -6,7 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Bot, User as UserIcon, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import MarkdownRenderer from './markdown-renderer';
+import { ActionableResponse } from './actionable-response';
+import { marked } from 'marked';
 
 interface MessageBubbleProps {
   message: Message;
@@ -33,9 +34,15 @@ export default function MessageBubble({ message, user }: MessageBubbleProps) {
     </Avatar>
   );
 
+  const isHtml = (str: string) => /<[a-z][\s\S]*>/i.test(str);
+
   const renderContent = () => {
     if (message.type === 'ai') {
-      return <MarkdownRenderer content={message.content} />;
+      if (isHtml(message.content)) {
+        const parsedHtml = marked.parse(message.content, { gfm: true, breaks: true });
+        return <ActionableResponse htmlContent={parsedHtml as string} />;
+      }
+      return <div className="markdown-content" dangerouslySetInnerHTML={{ __html: marked.parse(message.content, { gfm: true, breaks: true }) as string }} />;
     }
     return <p className="text-sm whitespace-pre-wrap">{message.content}</p>;
   }
