@@ -7,12 +7,15 @@ import { Bot, User as UserIcon, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import MarkdownRenderer from './markdown-renderer';
+import HtmlRenderer from './html-renderer';
 import { Card, CardContent } from './ui/card';
 
 interface MessageBubbleProps {
   message: Message;
   user: User | null;
 }
+
+const isHtml = (content: string) => /<[a-z][\s\S]*>/i.test(content);
 
 export default function MessageBubble({ message, user }: MessageBubbleProps) {
   const isUser = message.type === 'human';
@@ -34,6 +37,16 @@ export default function MessageBubble({ message, user }: MessageBubbleProps) {
     </Avatar>
   );
 
+  const renderContent = () => {
+    if (message.type === 'ai') {
+      if (isHtml(message.content)) {
+        return <HtmlRenderer content={message.content} />;
+      }
+      return <MarkdownRenderer content={message.content} />;
+    }
+    return <p className="text-sm whitespace-pre-wrap">{message.content}</p>;
+  }
+
   return (
     <div className={cn('flex items-start gap-4', isUser && 'flex-row-reverse')}>
       {!isError && avatar}
@@ -50,11 +63,7 @@ export default function MessageBubble({ message, user }: MessageBubbleProps) {
                 <AlertTriangle className="h-5 w-5" /> Error
              </div>
           )}
-          {message.type === 'ai' ? (
-            <MarkdownRenderer content={message.content} />
-          ) : (
-            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-          )}
+          {renderContent()}
         </div>
         <span className="text-xs text-muted-foreground">
           {format(new Date(message.timestamp), 'h:mm a')}

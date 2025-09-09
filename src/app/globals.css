@@ -85,35 +85,35 @@ body {
   body {
     @apply bg-background text-foreground;
   }
-  .markdown-content {
+  .markdown-content, .html-content {
     @apply text-sm space-y-4;
   }
-  .markdown-content h1,
-  .markdown-content h2,
-  .markdown-content h3 {
+  .markdown-content h1, .html-content h1,
+  .markdown-content h2, .html-content h2,
+  .markdown-content h3, .html-content h3 {
     @apply font-bold border-b pb-2;
   }
-  .markdown-content h1 { @apply text-2xl; }
-  .markdown-content h2 { @apply text-xl; }
-  .markdown-content h3 { @apply text-lg; }
-  .markdown-content p { @apply leading-7; }
-  .markdown-content a { @apply text-primary underline; }
-  .markdown-content blockquote {
+  .markdown-content h1, .html-content h1 { @apply text-2xl; }
+  .markdown-content h2, .html-content h2 { @apply text-xl; }
+  .markdown-content h3, .html-content h3 { @apply text-lg; }
+  .markdown-content p, .html-content p { @apply leading-7; }
+  .markdown-content a, .html-content a { @apply text-primary underline; }
+  .markdown-content blockquote, .html-content blockquote {
     @apply border-l-4 pl-4 italic text-muted-foreground;
   }
-  .markdown-content ul,
-  .markdown-content ol {
+  .markdown-content ul, .html-content ul,
+  .markdown-content ol, .html-content ol {
     @apply list-inside ml-4 space-y-1;
   }
-  .markdown-content ul { @apply list-disc; }
-  .markdown-content ol { @apply list-decimal; }
-  .markdown-content code:not(pre > code) {
+  .markdown-content ul, .html-content ul { @apply list-disc; }
+  .markdown-content ol, .html-content ol { @apply list-decimal; }
+  .markdown-content code:not(pre > code), .html-content code:not(pre > code) {
     @apply bg-muted text-muted-foreground rounded-sm px-1 py-0.5 font-mono text-xs;
   }
-  .markdown-content pre {
+  .markdown-content pre, .html-content pre {
     @apply bg-gray-800 text-gray-100 rounded-md p-4 overflow-x-auto;
   }
-  .markdown-content pre code {
+  .markdown-content pre code, .html-content pre code {
     @apply bg-transparent p-0;
   }
 }
