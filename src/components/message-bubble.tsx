@@ -7,18 +7,10 @@ import { Bot, User as UserIcon, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import MarkdownRenderer from './markdown-renderer';
-import HtmlRenderer from './html-renderer';
 
 interface MessageBubbleProps {
   message: Message;
   user: User | null;
-}
-
-// A simple check to see if the content is likely intended to be HTML.
-// It looks for a starting html tag and avoids common markdown code blocks.
-const isHtml = (content: string) => {
-    const trimmed = content.trim();
-    return trimmed.startsWith('<') && trimmed.endsWith('>') && !trimmed.includes('```');
 }
 
 export default function MessageBubble({ message, user }: MessageBubbleProps) {
@@ -43,9 +35,6 @@ export default function MessageBubble({ message, user }: MessageBubbleProps) {
 
   const renderContent = () => {
     if (message.type === 'ai') {
-      if (isHtml(message.content)) {
-        return <HtmlRenderer content={message.content} />;
-      }
       return <MarkdownRenderer content={message.content} />;
     }
     return <p className="text-sm whitespace-pre-wrap">{message.content}</p>;
