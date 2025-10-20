@@ -36,14 +36,14 @@ export default function MessageInput({ onSendMessage, isLoading }: MessageInputP
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Type your message here..."
-        className="pr-24 min-h-[52px] resize-none"
+        className="pr-24 min-h-[60px] resize-none bg-background border-input shadow-sm focus-visible:ring-1"
         disabled={isLoading}
       />
       <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
          <p className="text-xs text-muted-foreground hidden md:block">
             <CornerDownLeft className="inline h-3 w-3" /> to send
          </p>
-        <Button type="submit" size="icon" disabled={isLoading || !message.trim()}>
+        <Button type="submit" size="icon" disabled={isLoading || !message.trim()} className="shadow-sm">
           {isLoading ? <Spinner size="sm" /> : <Send className="h-4 w-4" />}
           <span className="sr-only">Send</span>
         </Button>

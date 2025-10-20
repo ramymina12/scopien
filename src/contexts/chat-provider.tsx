@@ -6,6 +6,7 @@ import { useAuth } from './auth-provider';
 import type { ChatState, ChatSession, Message } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { generateChatTitle } from '@/ai/flows/generate-chat-title';
+import { getUserWebhookConfig, getGlobalWebhookSettings } from '@/lib/admin';
 
 interface ChatContextType {
   sessions: Record<string, ChatSession>;
@@ -30,6 +31,10 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
   const [state, setState] = useState<ChatState>(initialState);
   const [isSendingMessage, setIsSendingMessage] = useState(false);
+  const [webhookUrls, setWebhookUrls] = useState({
+    chatUrl: process.env.NEXT_PUBLIC_SEND_MESSAGE_WEBHOOK_URL || '',
+    historyUrl: process.env.NEXT_PUBLIC_CHAT_HISTORY_WEBHOOK_URL || '',
+  });
 
   const getStorageKey = useCallback((uid: string) => `scopieChatState_${uid}`, []);
 
@@ -65,10 +70,58 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state, user, getStorageKey]);
 
+  // Load webhook URLs (check for user-specific overrides)
+  useEffect(() => {
+    const loadWebhooks = async () => {
+      if (!user) return;
+
+      try {
+        // First, try to get user-specific webhook config
+        const userConfig = await getUserWebhookConfig(user.uid);
+        
+        if (userConfig && userConfig.isActive) {
+          // User has custom webhooks - use them
+          setWebhookUrls({
+            chatUrl: userConfig.chatWebhookUrl,
+            historyUrl: userConfig.historyWebhookUrl,
+          });
+          console.log('Using user-specific webhooks');
+        } else {
+          // No user-specific config, try global settings
+          const globalSettings = await getGlobalWebhookSettings();
+          
+          if (globalSettings) {
+            setWebhookUrls({
+              chatUrl: globalSettings.chatWebhook,
+              historyUrl: globalSettings.historyWebhook,
+            });
+            console.log('Using global webhook settings');
+          } else {
+            // Fallback to env variables
+            setWebhookUrls({
+              chatUrl: process.env.NEXT_PUBLIC_SEND_MESSAGE_WEBHOOK_URL || '',
+              historyUrl: process.env.NEXT_PUBLIC_CHAT_HISTORY_WEBHOOK_URL || '',
+            });
+            console.log('Using environment variable webhooks');
+          }
+        }
+      } catch (error) {
+        console.error('Error loading webhook config:', error);
+        // Fallback to env variables
+        setWebhookUrls({
+          chatUrl: process.env.NEXT_PUBLIC_SEND_MESSAGE_WEBHOOK_URL || '',
+          historyUrl: process.env.NEXT_PUBLIC_CHAT_HISTORY_WEBHOOK_URL || '',
+        });
+      }
+    };
+
+    loadWebhooks();
+  }, [user]);
+
   const selectSession = useCallback(async (sessionId: string | null) => {
     if (sessionId && state.sessions[sessionId] && !state.sessions[sessionId].historyFetched) {
         try {
-            const response = await fetch(`https://ai.scopien.com/webhook/9b5c21d6-370f-4a03-bed3-3e2b3da92c8b?sessionId=${sessionId}`);
+            const response = await fetch(`${webhookUrls.historyUrl}?sessionId=${sessionId}`);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
             
@@ -100,7 +153,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     } else {
         setState(prevState => ({ ...prevState, activeSessionId: sessionId }));
     }
-  }, [state.sessions, toast]);
+  }, [state.sessions, toast, webhookUrls.historyUrl]);
 
   const createNewSession = useCallback(() => {
     setState(prevState => ({ ...prevState, activeSessionId: null }));
@@ -185,18 +238,35 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      const response = await fetch('https://ai.scopien.com/webhook/7742abaa-046a-4362-ab28-b89393574ae6/chat', {
+      console.log('=== Webhook Request Details ===');
+      console.log('Webhook URL:', webhookUrls.chatUrl);
+      console.log('Message content:', messageContent);
+      console.log('Session ID:', currentSessionId);
+      
+      if (!webhookUrls.chatUrl) {
+        throw new Error('Chat webhook URL is not configured. Please check admin settings or .env file.');
+      }
+
+      const requestBody = {
+        chatInput: messageContent,
+        sessionId: currentSessionId,
+        timestamp: humanMessage.timestamp,
+      };
+      
+      console.log('Request body:', JSON.stringify(requestBody, null, 2));
+
+      const response = await fetch(webhookUrls.chatUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: messageContent,
-          sessionId: currentSessionId,
-          timestamp: humanMessage.timestamp,
-        }),
+        body: JSON.stringify(requestBody),
       });
+
+      console.log('Webhook response status:', response.status);
+      console.log('Webhook response headers:', Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
         const errorBody = await response.text();
+        console.error('Webhook error response:', errorBody);
         throw new Error(`API Error: ${response.status} ${response.statusText}. Body: ${errorBody}`);
       }
 

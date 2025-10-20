@@ -23,20 +23,24 @@ export function WelcomeScreen({ onNewChat }: WelcomeScreenProps) {
   }
 
   return (
-    <div className="flex h-full flex-col items-center justify-center text-center">
+    <div className="flex h-full flex-col items-center justify-center text-center bg-background">
       <div className="flex flex-col items-center justify-center flex-1 p-6">
-        <Bot className="h-16 w-16 mb-4 text-primary" />
-        <h1 className="text-4xl font-bold">How can I help you today?</h1>
+        <div className="mb-6 p-4 rounded-full bg-primary/10">
+          <Bot className="h-16 w-16 text-primary" />
+        </div>
+        <h1 className="text-4xl font-bold mb-2">How can I help you today?</h1>
+        <p className="text-muted-foreground">Choose a suggestion below or type your own message</p>
       </div>
-      <div className="w-full max-w-3xl p-4 space-y-4">
+      <div className="w-full max-w-4xl px-6 pb-6 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {suggestions.map((s, i) => (
             <button
               key={i}
               onClick={() => handleSuggestionClick(s)}
-              className="p-4 border rounded-lg hover:bg-secondary text-left text-sm"
+              className="p-4 bg-card border rounded-lg hover:bg-accent hover:border-primary transition-colors text-left text-sm shadow-sm"
             >
-              <p className="font-semibold">{s}</p>
+              <MessageSquare className="h-4 w-4 mb-2 text-primary" />
+              <p className="font-medium">{s}</p>
             </button>
           ))}
         </div>

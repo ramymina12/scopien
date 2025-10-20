@@ -55,9 +55,9 @@ export default function MessageBubble({ message, user }: MessageBubbleProps) {
         )}>
         <div
           className={cn(
-            'max-w-4xl rounded-lg p-3 w-full',
-            isUser ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground',
-            isError && 'bg-destructive/10 border border-destructive/50 text-destructive-foreground w-full'
+            'max-w-4xl rounded-lg p-4 w-full border shadow-sm',
+            isUser ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-card-foreground border-border',
+            isError && 'bg-destructive/10 border-destructive text-destructive-foreground w-full'
           )}
         >
           {isError && (
@@ -67,7 +67,7 @@ export default function MessageBubble({ message, user }: MessageBubbleProps) {
           )}
           {renderContent()}
         </div>
-        <span className="text-xs text-muted-foreground">
+        <span className="text-xs text-muted-foreground px-1">
           {format(new Date(message.timestamp), 'h:mm a')}
         </span>
       </div>

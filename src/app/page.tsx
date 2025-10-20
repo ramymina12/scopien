@@ -3,6 +3,7 @@
 import { useAuth } from '@/contexts/auth-provider';
 import LoginPage from '@/components/login-page';
 import ChatLayout from '@/components/chat-layout';
+import ChatArea from '@/components/chat-area';
 import { Spinner } from '@/components/spinner';
 import type { User } from 'firebase/auth';
 
@@ -17,5 +18,11 @@ export default function Home() {
     );
   }
 
-  return user ? <ChatLayout user={user as User} /> : <LoginPage />;
+  return user ? (
+    <ChatLayout user={user as User}>
+      <ChatArea />
+    </ChatLayout>
+  ) : (
+    <LoginPage />
+  );
 }

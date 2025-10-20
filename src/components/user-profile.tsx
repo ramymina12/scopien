@@ -8,16 +8,21 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LogOut, User as UserIcon } from 'lucide-react';
+import { LogOut, User as UserIcon, Shield } from 'lucide-react';
 import { Button } from './ui/button';
+import { useRouter } from 'next/navigation';
 
 interface UserProfileProps {
   user: User;
+  isAdmin?: boolean;
 }
 
-export default function UserProfile({ user }: UserProfileProps) {
+export default function UserProfile({ user, isAdmin }: UserProfileProps) {
+  const router = useRouter();
+  
   const handleLogout = async () => {
     await signOut(auth);
   };
@@ -30,21 +35,32 @@ export default function UserProfile({ user }: UserProfileProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="w-full justify-start p-2 h-auto">
-          <div className="flex w-full items-center gap-2">
-            <Avatar className="h-8 w-8">
+        <Button variant="ghost" className="w-full justify-start p-3 h-auto hover:bg-sidebar-accent rounded-lg">
+          <div className="flex w-full items-center gap-3">
+            <Avatar className="h-9 w-9 border-2 border-sidebar-border">
               <AvatarImage src={user.photoURL || undefined} alt={user.displayName || 'User'} />
-              <AvatarFallback>{getInitials(user.displayName)}</AvatarFallback>
+              <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                {getInitials(user.displayName)}
+              </AvatarFallback>
             </Avatar>
             <div className="flex flex-col items-start truncate group-data-[collapsible=icon]:hidden">
-              <span className="font-medium truncate text-sm text-sidebar-foreground">{user.displayName}</span>
-              <span className="text-xs text-muted-foreground truncate">{user.email}</span>
+              <span className="font-medium truncate text-sm text-sidebar-foreground">{user.displayName || 'User'}</span>
+              <span className="text-xs text-sidebar-foreground/60 truncate">{user.email}</span>
             </div>
           </div>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent side="top" align="start" className="w-56">
-        <DropdownMenuItem onClick={handleLogout}>
+      <DropdownMenuContent side="top" align="start" className="w-56 shadow-lg">
+        {isAdmin && (
+          <>
+            <DropdownMenuItem onClick={() => router.push('/admin')}>
+              <Shield className="mr-2 h-4 w-4" />
+              <span>Admin Panel</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
+        <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>

@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { initializeUser } from '@/lib/admin';
 
 interface AuthContextType {
   user: User | null;
@@ -19,8 +20,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
+      
+      // Initialize user in Firestore if they don't exist
+      if (user) {
+        try {
+          await initializeUser(
+            user.uid,
+            user.email!,
+            user.displayName || undefined,
+            user.photoURL || undefined
+          );
+        } catch (error) {
+          console.error('Error initializing user:', error);
+        }
+      }
+      
       setLoading(false);
     });
 
